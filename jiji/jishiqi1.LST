@@ -1,0 +1,198 @@
+C51 COMPILER V9.01   JISHIQI1                                                              04/01/2018 17:40:12 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE JISHIQI1
+OBJECT MODULE PLACED IN jishiqi1.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE jishiqi1.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #define uchar unsigned char
+   3          #define uint unsigned int
+   4          sbit fengmin=P3^2;
+   5          sbit key1=P2^0;
+   6          sbit key2=P2^1;
+   7          sbit key3=P2^2;
+   8          sbit key4=P2^3;
+   9          sbit key5=P2^4;
+  10          sbit key6=P2^5;
+  11          sbit key7=P2^6;
+  12          uchar code table[]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};
+  13          void delayms(xms);
+  14          uchar numt0;
+  15          uint num,bai,shi,ge;
+  16          void display(uint numdis)
+  17          {
+  18   1        bai=numdis/100;
+  19   1        shi=(numdis/10)%10;
+  20   1        ge=numdis%10;
+  21   1      
+  22   1        P0=table[bai];
+  23   1        P3=0xef;
+  24   1        delayms(5);
+  25   1      
+  26   1        P0=table[shi]+0x80;
+  27   1        P3=0xdf;
+  28   1        delayms(5);
+  29   1      
+  30   1        P0=table[ge];
+  31   1        P3=0xbf;
+  32   1        delayms(5);
+  33   1      
+  34   1        if(num==999)
+  35   1        {fengmin=0;}
+  36   1      
+  37   1        if(num==0)
+  38   1        fengmin=0;
+  39   1      }
+  40          void delayms(xms)
+  41          {
+  42   1        uint i,j;
+  43   1        for(i=xms;i>0;i--)
+  44   1          for(j=110;j>0;j--);
+  45   1      }
+  46          void init()
+  47          {
+  48   1        TMOD=0x11;
+  49   1        EA=1;
+  50   1        ET0=1;
+  51   1        ET1=1;
+  52   1      }
+  53          void keyscan()
+  54          {
+  55   1        if(key1==0)
+C51 COMPILER V9.01   JISHIQI1                                                              04/01/2018 17:40:12 PAGE 2   
+
+  56   1        {
+  57   2          delayms(10);
+  58   2              if(key1==0)
+  59   2              {
+  60   3                num++;
+  61   3                if(num==1000)
+  62   3                  num=0;
+  63   3            while(!key1);
+  64   3              }
+  65   2        }
+  66   1        if(key2==0)
+  67   1        {
+  68   2          delayms(10);
+  69   2              if(key2==0)
+  70   2              {
+  71   3                if(num==0)
+  72   3                  num=1000;
+  73   3            num--;
+  74   3                while(!key2);
+  75   3              }
+  76   2        }
+  77   1        if(key3==0)
+  78   1        {
+  79   2          delayms(10);
+  80   2              if(key3==0)
+  81   2              {
+  82   3                num=0;
+  83   3                while(!key3);
+  84   3              }
+  85   2        }
+  86   1        if(key4==0)
+  87   1        {
+  88   2          delayms(10);
+  89   2              if(key4==0)
+  90   2              {
+  91   3                while(!key4)
+  92   3                TR0=~TR0;
+  93   3              }
+  94   2        }
+  95   1        if(key5==0)
+  96   1        {
+  97   2          delayms(10);
+  98   2              if(key5==0)
+  99   2              {
+ 100   3                while(!key5)
+ 101   3                TR1=~TR1;
+ 102   3              }
+ 103   2        }
+ 104   1          if(key6==0)
+ 105   1        {
+ 106   2          delayms(10);
+ 107   2              if(key6==0)
+ 108   2              {
+ 109   3                num=num+10;
+ 110   3                if(num>=1000)
+ 111   3                  num=0;
+ 112   3            while(!key6);
+ 113   3              }
+ 114   2        }
+ 115   1            if(key7==0)
+ 116   1        {
+ 117   2          delayms(10);
+C51 COMPILER V9.01   JISHIQI1                                                              04/01/2018 17:40:12 PAGE 3   
+
+ 118   2              if(key7==0)
+ 119   2              {
+ 120   3                num=num-10;
+ 121   3                if(num<=0)
+ 122   3                  num=1000;
+ 123   3            while(!key7);
+ 124   3              }
+ 125   2        }
+ 126   1      }
+ 127          void main()
+ 128          {
+ 129   1        init();
+ 130   1        while(1)
+ 131   1        {
+ 132   2          keyscan();
+ 133   2              display(num);  
+ 134   2        }
+ 135   1      }
+ 136          void T0_time() interrupt 1
+ 137          {
+ 138   1        TH0=(65536-45872)/256;
+ 139   1        TL0=(65536-45872)%256;
+ 140   1        numt0++;
+ 141   1        if(numt0==2)
+ 142   1        {
+ 143   2          numt0=0;
+ 144   2                      num--;
+ 145   2              if(num==0)
+ 146   2              { 
+ 147   3              TR0=0; 
+ 148   3              num=0;
+ 149   3              }
+ 150   2      
+ 151   2        }
+ 152   1      }
+ 153          void T1_time() interrupt 3
+ 154          {
+ 155   1        TH1=(65536-45872)/256;
+ 156   1        TL1=(65536-45872)%256;
+ 157   1        numt0++;
+ 158   1        if(numt0==2)
+ 159   1        {
+ 160   2          numt0=0;
+ 161   2                      num++;
+ 162   2              if(num==1000)
+ 163   2              {
+ 164   3              TR1=0;
+ 165   3               num=999;
+ 166   3              }
+ 167   2      
+ 168   2        }
+ 169   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    477    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+C51 COMPILER V9.01   JISHIQI1                                                              04/01/2018 17:40:12 PAGE 4   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
